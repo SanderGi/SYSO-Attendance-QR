@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>SYSO | Admin</title>
+    <meta name="description" content="A program to automate SYSO attendance" />
+    <link
+      id="favicon"
+      rel="icon"
+      href="https://syso.org/wp-content/uploads/2016/06/syso_logo_web_markM_BLUE.png"
+      type="image/png"
+    />
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- import the webpage's stylesheet -->
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+
+  <body>
+    <br />
+    <div id="container" style="position: relative">
+      <h1>
+        <img
+          src="https://syso.org/wp-content/uploads/2016/06/syso_logo_web_markM_BLUE.png"
+        />
+        Scanner Actions
+      </h1>
+      <div class="back">
+        <div class="form__group field">
+          <input
+            type="password"
+            class="form__field"
+            placeholder="Passkey"
+            name="passkey"
+            id="passkey"
+            required
+          />
+          <label for="passkey" class="form__label">Passkey</label>
+        </div>
+        <div class="btn-wrapper">
+          <button id="login" class="btn">LOGIN</button>
+        </div>
+      </div>
+      <br />
+      <div class="back">
+        <h2>Get Registrations</h2>
+        <br />
+        <h3>Date*</h3>
+        <select class="date" id="date">
+          <option>Options loading...</option>
+        </select>
+        <select class="Orchestra" id="Orchestra">
+          <option>YSO</option>
+          <option>JSO</option>
+        </select>
+        <div class="btn-wrapper">
+          <button id="cpcsv" class="btn">Details</button>
+        </div>
+        <div class="btn-wrapper">
+          <button id="cpcsvsimple" class="btn" style="display: none">
+            COPY SIMPLE
+          </button>
+        </div>
+        <div class="btn-wrapper">
+          <button id="cpcsvsimple2" class="btn">Google Sheet</button>
+        </div>
+        <div class="btn-wrapper">
+          <button id="cpcsvsimpleDupe" class="btn" style="display: none">
+            Dupe Finder
+          </button>
+        </div>
+        <div class="btn-wrapper">
+          <button id="getcsv" class="btn" style="display: none">
+            DOWNLOAD
+          </button>
+        </div>
+      </div>
+      <br />
+      <div class="back">
+        <h2>Set student as out for a term</h2>
+        <br />
+        <h3>Term</h3>
+        <select class="term" id="term">
+          <option>1</option>
+          <option>2</option>
+          <option>3</option>
+        </select>
+        <div class="form__group field">
+          <input
+            type="text"
+            class="form__field"
+            placeholder="Student ID"
+            name="studentidterm"
+            id="studentidterm"
+            required
+          />
+          <label for="studentidterm" class="form__label">Student ID</label>
+        </div>
+        <div class="btn-wrapper">
+          <button id="btnAddStudentOutForTerm" class="btn">Mark as Out</button>
+        </div>
+        <div class="btn-wrapper">
+          <button id="btnRemoveStudentOutForTerm" class="btn">
+            Mark as In
+          </button>
+        </div>
+      </div>
+      <br />
+      <div class="back">
+        <h2>Edit Registrations</h2>
+        <div class="form__group field">
+          <input
+            type="text"
+            class="form__field"
+            placeholder="Registration ID*"
+            name="regid"
+            id="regid"
+            required
+          />
+          <label for="regid" class="form__label">Registration ID*</label>
+        </div>
+        <div class="form__group field">
+          <input
+            type="text"
+            class="form__field"
+            placeholder="Student ID"
+            name="studid"
+            id="studid"
+            required
+          />
+          <label for="studid" class="form__label">Student ID</label>
+        </div>
+        <div class="form__group field">
+          <input
+            type="text"
+            class="form__field"
+            placeholder="Name"
+            name="regnam"
+            id="regnam"
+            required
+          />
+          <label for="regnam" class="form__label">Name</label>
+        </div>
+        <select class="date" id="regdate">
+          <option>Options loading...</option>
+        </select>
+        <br /><br />
+        <select id="status">
+          <option>DON'T CHANGE</option>
+          <option>P</option>
+          <option selected>ABS</option>
+          <option>SICK</option>
+          <option>S&E</option>
+          <option>OUT</option>
+          <option>.5 ABS</option>
+          <option>P-L</option>
+        </select>
+        <div class="btn-wrapper">
+          <button id="registrations-update" class="btn">UPDATE</button>
+        </div>
+        <div class="btn-wrapper">
+          <button
+            id="registrations-delete"
+            class="btn"
+            style="background-color: red"
+          >
+            DELETE
+          </button>
+        </div>
+      </div>
+      <br />
+      <div class="back">
+        <h2>Edit Rehearsal Dates</h2>
+        <div class="form__group field">
+          <input
+            type="text"
+            class="form__field"
+            placeholder="Date*"
+            name="rehdate"
+            id="rehdate"
+            required
+          />
+          <label for="rehdate" class="form__label">Date*</label>
+          <!-- Has to be a text and not selection field to support adding new dates -->
+        </div>
+        <div class="form__group field">
+          <input
+            type="text"
+            class="form__field"
+            placeholder="Type"
+            name="rehtype"
+            id="rehtype"
+          />
+          <label for="rehtype" class="form__label">Type</label>
+        </div>
+        <div class="form__group field">
+          <input
+            type="text"
+            class="form__field"
+            placeholder="Trimester"
+            name="rehtri"
+            id="rehtri"
+          />
+          <label for="rehtri" class="form__label">Trimester</label>
+        </div>
+        <div class="btn-wrapper">
+          <button id="rehearsal" class="btn">SAVE</button>
+        </div>
+        <div class="btn-wrapper">
+          <button
+            id="rehearsal-delete"
+            class="btn"
+            style="background-color: red"
+          >
+            DELETE
+          </button>
+        </div>
+      </div>
+      <br />
+      <div class="back">
+        <h2>Edit Students</h2>
+        <div class="form__group field">
+          <input
+            type="text"
+            class="form__field"
+            placeholder="ID*"
+            name="id"
+            id="id"
+            required
+          />
+          <label for="id" class="form__label">ID*</label>
+        </div>
+        <div class="form__group field">
+          <input
+            type="text"
+            class="form__field"
+            placeholder="Name"
+            name="name"
+            id="name"
+          />
+          <label for="name" class="form__label">Name</label>
+        </div>
+        <div class="form__group field">
+          <input
+            type="text"
+            class="form__field"
+            placeholder="Instrument"
+            name="instrument"
+            id="instrument"
+          />
+          <label for="instrument" class="form__label">Instrument</label>
+        </div>
+        <div class="form__group field">
+          <input
+            type="text"
+            class="form__field"
+            placeholder="InstrumentSection"
+            name="section"
+            id="section"
+          />
+          <label for="section" class="form__label">InstrumentSection</label>
+        </div>
+        <div class="form__group field">
+          <input
+            type="text"
+            class="form__field"
+            placeholder="Email"
+            name="email"
+            id="email"
+          />
+          <label for="email" class="form__label">Email</label>
+        </div>
+        <div class="form__group field">
+          <input
+            type="text"
+            class="form__field"
+            placeholder="ParentEmail"
+            name="parent"
+            id="parent"
+          />
+          <label for="parent" class="form__label">ParentEmail</label>
+        </div>
+        <div class="form__group field">
+          <select class="Orchestra" id="student_orchestra">
+            <option>YSO</option>
+            <option>JSO</option>
+          </select>
+        </div>
+        <div class="btn-wrapper">
+          <button id="students" class="btn">SAVE</button>
+        </div>
+        <div class="btn-wrapper">
+          <button id="getall" class="btn">COPY ALL</button>
+        </div>
+        <div class="btn-wrapper">
+          <button
+            id="students-delete"
+            class="btn"
+            style="background-color: red"
+          >
+            DELETE
+          </button>
+        </div>
+      </div>
+    </div>
+    <iframe
+      style="height: 0; border: none; margin: 0; padding: 0"
+      id="frame"
+    ></iframe>
+    <script>
+      // login button
+      function login() {
+        console.log("hi");
+        let passkey = document.getElementById("passkey").value;
+        localStorage.setItem("passkey", passkey);
+        fetch(`/iskeyvalid?`, {
+          headers: { passkey: localStorage.getItem("passkey") },
+        }).then((res) => alert(res.status));
+      }
+      document.getElementById("login").addEventListener("click", login);
+
+      // student out for a term
+      document
+        .getElementById("btnAddStudentOutForTerm")
+        .addEventListener("click", makestudentoutforterm);
+      function makestudentoutforterm() {
+        console.log("makestudentoutforterm");
+
+        let term = document.getElementById("term").value;
+        let id = document.getElementById("studentidterm").value;
+
+        console.log(`makestudentoutforterm: ${id}, ${term}`);
+
+        fetch(`/setstudentoutforterm?term=${term}&id=${id}&remove=0`, {
+          headers: { passkey: localStorage.getItem("passkey") },
+        }).then((res) => {
+          res.text().then(() => {
+            FlipButtonBackgroundcolor(
+              document.getElementById("btnAddStudentOutForTerm")
+            );
+          });
+        });
+      }
+
+      document
+        .getElementById("btnRemoveStudentOutForTerm")
+        .addEventListener("click", removestudentoutforterm);
+      function removestudentoutforterm() {
+        console.log("removestudentoutforterm");
+
+        let term = document.getElementById("term").value;
+        let id = document.getElementById("studentidterm").value;
+
+        console.log(`removestudentoutforterm: ${id}, ${term}`);
+
+        fetch(`/setstudentoutforterm?term=${term}&id=${id}&remove=1`, {
+          headers: { passkey: localStorage.getItem("passkey") },
+        }).then((res) => {
+          res.text().then(() => {
+            FlipButtonBackgroundcolor(
+              document.getElementById("btnRemoveStudentOutForTerm")
+            );
+          });
+        });
+      }
+
+      // copy csv button
+      document.getElementById("cpcsv").addEventListener("click", () => {
+        let date =
+          rehearsalDates[document.getElementById("date").selectedIndex]
+            .rehearsal_date; // document.getElementById('date').value;
+        let orchestra = document.getElementById("Orchestra").value;
+        fetch(`/downloadRegistrations?date=${date}&Orchestra=${orchestra}`, {
+          headers: { passkey: localStorage.getItem("passkey") },
+        }).then((res) => {
+          res.text().then((str) => {
+            SetClipboardTextAndFlipButtonBackgroundcolor(
+              str,
+              document.getElementById("cpcsv")
+            );
+          });
+        });
+      });
+
+      // simple copy csv button
+      document.getElementById("cpcsvsimple").addEventListener("click", () => {
+        let date =
+          rehearsalDates[document.getElementById("date").selectedIndex]
+            .rehearsal_date; // document.getElementById('date').value;
+        let orchestra = document.getElementById("Orchestra").value;
+        fetch(
+          `/downloadRegistrationsSimple?date=${date}&Orchestra=${orchestra}`,
+          { headers: { passkey: localStorage.getItem("passkey") } }
+        ).then((res) => {
+          res.text().then((str) => {
+            SetClipboardTextAndFlipButtonBackgroundcolor(
+              str,
+              document.getElementById("cpcsvsimple")
+            );
+          });
+        });
+      });
+
+      // simple copy csv button
+      document.getElementById("cpcsvsimple2").addEventListener("click", () => {
+        let date =
+          rehearsalDates[document.getElementById("date").selectedIndex]
+            .rehearsal_date; // document.getElementById('date').value;
+        let orchestra = document.getElementById("Orchestra").value;
+        fetch(
+          `/downloadRegistrationsSimple2?date=${date}&Orchestra=${orchestra}`,
+          { headers: { passkey: localStorage.getItem("passkey") } }
+        ).then((res) => {
+          res.text().then((str) => {
+            let btnElement = document.getElementById("cpcsvsimple2");
+            SetClipboardTextAndFlipButtonBackgroundcolor(str, btnElement);
+          });
+        });
+      });
+
+      function SetClipboardTextAndFlipButtonBackgroundcolor(str, btnElement) {
+        window.navigator.clipboard.writeText(str);
+        let prevBackgroundColor = btnElement.style.backgroundColor;
+        btnElement.style.backgroundColor = "#00ad00";
+        setTimeout(() => {
+          btnElement.style.backgroundColor = prevBackgroundColor;
+        }, 2000);
+      }
+
+      function FlipButtonBackgroundcolor(btnElement) {
+        let prevBackgroundColor = btnElement.style.backgroundColor;
+        btnElement.style.backgroundColor = "#00ad00";
+        setTimeout(() => {
+          btnElement.style.backgroundColor = prevBackgroundColor;
+        }, 2000);
+      }
+      // simple2 copy csv button
+      document
+        .getElementById("cpcsvsimpleDupe")
+        .addEventListener("click", () => {
+          let date =
+            rehearsalDates[document.getElementById("date").selectedIndex]
+              .rehearsal_date; // document.getElementById('date').value;
+          let orchestra = document.getElementById("Orchestra").value;
+          fetch(
+            `/downloadRegistrationsSimpleDupeFinder?date=${date}&Orchestra=${orchestra}`,
+            { headers: { passkey: localStorage.getItem("passkey") } }
+          ).then((res) => {
+            res.text().then((str) => {
+              SetClipboardTextAndFlipButtonBackgroundcolor(
+                str,
+                document.getElementById("cpcsvsimpleDupe")
+              );
+            });
+          });
+        });
+
+      document.getElementById("date").addEventListener("click", () => {
+        document.getElementById("cpcsv").style.backgroundColor = "#008ee2";
+      });
+      // download csv button
+      document.getElementById("getcsv").addEventListener("click", () => {
+        let date =
+          rehearsalDates[document.getElementById("date").selectedIndex]
+            .rehearsal_date; // document.getElementById('date').value;
+        let xhr = new XMLHttpRequest();
+        xhr.open("GET", `/downloadRegistrations?date=${date}`);
+        xhr.onreadystatechange = handler;
+        xhr.responseType = "blob";
+        xhr.setRequestHeader("passkey", localStorage.getItem("passkey"));
+        xhr.send();
+      });
+      function handler() {
+        if (this.readyState === this.DONE) {
+          if (this.status === 200) {
+            var data_url = URL.createObjectURL(this.response);
+            document.getElementById("frame").src = data_url;
+          } else {
+            console.error("no csv for you :(");
+          }
+        }
+      }
+
+      // delete registration button
+      document
+        .getElementById("registrations-delete")
+        .addEventListener("click", () => {
+          let guid = document.getElementById("regid").value;
+          if (!guid) return;
+          if (
+            confirm(
+              `This will permanently delete any registrations with guid=${guid} (there should only be one, but I make no guarantees that the code works as intended). Click cancel to abort.`
+            )
+          ) {
+            fetch(`/deleteRegistration?guid=${guid}`, {
+              headers: { passkey: localStorage.getItem("passkey") },
+            });
+          }
+        });
+      // update registrations
+      document
+        .getElementById("registrations-update")
+        .addEventListener("click", () => {
+          let guid = document.getElementById("regid").value;
+          if (!guid) return;
+          let id = document.getElementById("studid").value;
+          let name = document.getElementById("regnam").value;
+          let date =
+            rehearsalDates[document.getElementById("regdate").selectedIndex]
+              .rehearsal_date;
+          let status =
+            document.getElementById("status").options[
+              document.getElementById("status").selectedIndex
+            ].value;
+          if (status == "DON'T CHANGE") status = "";
+          fetch(
+            `/addRegistration?guid=${guid}&id=${id}&name=${name}&date=${date}&status=${status}`,
+            { headers: { passkey: localStorage.getItem("passkey") } }
+          );
+        });
+
+      // get rehearsal dates
+      let rehearsalDates = [];
+      function updateDates(dates) {
+        rehearsalDates = dates;
+        [...document.getElementsByClassName("date")].forEach((elem) => {
+          while (elem.firstChild) {
+            elem.removeChild(elem.firstChild);
+          }
+          let searchDate = new Date(Date.now());
+          let minDiff = Infinity;
+          rehearsalDates.forEach((date) => {
+            let diff = Math.abs(
+              new Date(date.rehearsal_date + " ") - searchDate
+            );
+            minDiff = minDiff > diff ? diff : minDiff;
+          });
+          rehearsalDates.forEach((date) => {
+            let option = document.createElement("option");
+            option.textContent =
+              date.rehearsal_date +
+              "—" +
+              (date.rehearsal_type ? date.rehearsal_type : "rehearsal") +
+              "—trimester " +
+              date.trimester;
+            if (
+              Math.abs(new Date(date.rehearsal_date + " ") - searchDate) ==
+              minDiff
+            ) {
+              option.selected = true;
+            }
+            elem.appendChild(option);
+          });
+        });
+      }
+      fetch("/getRehearsalDates", {
+        headers: { passkey: localStorage.getItem("passkey") },
+      }).then((res) => {
+        res.json().then((dates) => {
+          updateDates(dates);
+        });
+      });
+      // edit rehearsal dates -- delete
+      document
+        .getElementById("rehearsal-delete")
+        .addEventListener("click", () => {
+          let date = document.getElementById("rehdate").value;
+          if (!date) return;
+          if (
+            confirm(
+              `This will permanently delete any rehearsals with date=${date} (there should only be one, but I make no guarantees that the code works as intended). Click cancel to abort.`
+            )
+          ) {
+            fetch(`/deleteRehearsalDate?date=${date}`, {
+              headers: { passkey: localStorage.getItem("passkey") },
+            }).then((res) => {
+              if (res.status == 200) {
+                res.json().then((dates) => {
+                  updateDates(dates);
+                });
+              }
+            });
+          }
+        });
+      // edit rehearsal dates -- save (add/update)
+      document.getElementById("rehearsal").addEventListener("click", () => {
+        let date = document.getElementById("rehdate").value;
+        if (!date) return;
+        let type = document.getElementById("rehtype").value;
+        let trimester = document.getElementById("rehtri").value;
+        let options = `?date=${date}`;
+        if (type) {
+          options += "&type=" + type;
+        }
+        if (trimester) {
+          options += "&trimester=" + trimester;
+        }
+        fetch(`/saveRehearsalDate${options}`, {
+          headers: { passkey: localStorage.getItem("passkey") },
+        }).then((res) => {
+          if (res.status == 200) {
+            res.json().then((dates) => {
+              updateDates(dates);
+            });
+          }
+        });
+      });
+
+      // edit students -- delete
+      document
+        .getElementById("students-delete")
+        .addEventListener("click", () => {
+          let id = document.getElementById("id").value;
+          if (!id) return;
+          if (
+            confirm(
+              `This will permanently delete any Students with ID=${id} (there should only be one, but I make no guarantees). Click cancel to abort.`
+            )
+          ) {
+            fetch(`/deleteStudent?id=${id}`, {
+              headers: { passkey: localStorage.getItem("passkey") },
+            }).then((res) => {
+              if (res.status == 200) {
+                console.log("deleted student: " + id);
+              }
+            });
+          }
+        });
+      // edit students -- save (add/update)
+      document.getElementById("students").addEventListener("click", () => {
+        let id = document.getElementById("id").value;
+        if (!id) return;
+        let name = document.getElementById("name").value;
+        let instrument = document.getElementById("instrument").value;
+        let section = document.getElementById("section").value;
+        let email = document.getElementById("email").value;
+        let parent = document.getElementById("parent").value;
+        let orchestra = document.getElementById("student_orchestra").value;
+        fetch(
+          `/saveStudent?id=${id}&name=${name}&instrument=${instrument}&instrumentSection=${section}&email=${email}&parentEmail=${parent}&orchestra=${orchestra}`,
+          { headers: { passkey: localStorage.getItem("passkey") } }
+        ).then((res) => {
+          if (res.status == 200) {
+            console.log("student saved: " + id);
+          }
+        });
+      });
+      // download students -- copy csv
+      document.getElementById("getall").addEventListener("click", (e) => {
+        let date =
+          rehearsalDates[document.getElementById("date").selectedIndex]
+            .rehearsal_date; // document.getElementById('date').value;
+        fetch("/downloadStudents", {
+          headers: { passkey: localStorage.getItem("passkey") },
+        }).then((res) => {
+          res.text().then((str) => {
+            window.navigator.clipboard.writeText(str);
+            document.getElementById("getall").style.backgroundColor = "#00ad00";
+          });
+        });
+        e.preventDefault();
+      });
+      document.body.addEventListener("click", () => {
+        document.getElementById("getall").style.backgroundColor = "#008ee2";
+      });
+    </script>
+  </body>
+</html>

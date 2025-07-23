@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>SYSO | Staff</title>
+  <meta name="description" content="A program to automate SYSO attendance">
+  <link id="favicon" rel="icon" href="https://syso.org/wp-content/uploads/2016/06/syso_logo_web_markM_BLUE.png"
+    type="image/png">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- script src="html5-qrcode.min.js"></script -->
+  <!-- import the webpage's stylesheet -->
+  <link rel="stylesheet" href="/stylereg.css">
+</head>
+
+<body>
+  <br>
+  <div>
+    <table>
+      <tr>
+        <th><img src="https://syso.org/wp-content/uploads/2016/06/syso_logo_web_markM_BLUE.png"></th>
+        <th>
+          <h1>Student Registrations</h1>
+        </th>
+      </tr>
+    </table>
+    <div class="back">
+      <div id="grpLogin" style="display: none">
+        <div class="form__group field">
+          <input type="text" class="form__field" placeholder="Student ID" name="studentkey" id="studentkey" required />
+          <label for="studentkey" class="form__label">Staff Password</label>
+        </div>
+        <div class="btn-wrapper">
+          <button id="signin" class="btn">Sign In</button>
+        </div>
+      </div>
+      <div id="grpRegistrations" style="display: none">
+        <table>
+          <tr>
+            <td>
+              <div class="btn-wrapper">
+                <button id="btnShowData" class="btn">Show</button>
+              </div>
+            </td>
+            <td>
+              <div>
+                <label for="Orchestra">Orchestra</label>
+                <select class="Orchestra" id="Orchestra">
+                  <option>ALL</option>
+                  <option selected>YSO</option>
+                  <option>JSO</option>
+                </select>
+              </div>
+            </td>
+            <td>
+              <div>
+                <label for="Trimester">Trimester</label>
+                <select class="Trimester" id="Trimester">
+                  <option>ALL</option>
+                  <option>1</option>
+                  <option selected>2</option>
+                  <option>3</option>
+                </select>
+              </div>
+            </td>
+            <td>
+              <div>
+                <label for="RehearsalDate">Rehearsal date</label>
+                <select class="date" id="RehearsalDate">
+                  <option>Options loading...</option>
+                </select>
+              </div>
+            </td>
+            <td>
+              <div>
+                <label for="Instrument">Instrument</label>
+                <select class="Instrument" id="Instrument">
+                  <option>ALL</option>
+                  <option>Violin 1</option>
+                  <option>Violin 2</option>
+                  <option>Viola</option>
+                  <option>Tuba</option>
+                  <option>Trumpet</option>
+                  <option>Trombone</option>
+                  <option>Piano</option>
+                  <option>Percussion</option>
+                  <option>Oboe</option>
+                  <option>Harp</option>
+                  <option>French Horn</option>
+                  <option>Clarinet</option>
+                  <option>Cello</option>
+                  <option>Bassoon</option>
+                  <option>Bass</option>
+                </select>
+              </div>
+            </td>
+            <td>
+              <div>
+                <label for="AttendanceState">Attendance</label>
+                <select class="AttendanceState" id="AttendanceState">
+                  <option>ALL</option>
+                  <option>P</option>
+                  <option>ABS</option>
+                  <option>.5 ABS</option>
+                  <option>ABS-NR</option>
+                  <option>OUT</option>
+                </select>
+              </div>
+            </td>
+            <td>
+              <div>
+                <label for="StudentType">RA?</label>
+                <select class="StudentType" id="StudentType">
+                  <option>ALL</option>
+                  <option>RA</option>
+                </select>
+              </div>
+            </td>
+          </tr>
+      </div>
+      </table>
+    </div>
+    <div class="divTable sysoAttendance">
+      <div class="divTableHeading" id="tableHeading">
+      </div>
+      <div class="divTableBody" id="tableBody">
+      </div>
+    </div>
+    <div>
+      <p class="legend"><b>P</b>resent, <b>Abs</b>ent, <b>.5 Abs</b>ent, <b>Sick</b> (absent), <b>Out</b></p>
+    </div>
+  </div>
+  </div>
+  </div>
+  <iframe style="height:0;border:none;margin:0;padding:0;" id="frame"></iframe>
+  <script>
+    const State_ShowSignIn = "ShowSignIn";
+    const State_ShowPageOptions = "ShowPageOptions";
+    const State_ShowStudentRegistrations = "ShowStudentRegistrations";
+
+    let rehearsalDates = [];
+
+    let eventlistenersInitialized = false;
+    setupEventlisteners();
+    eventlistenersInitialized = true;
+
+    let signedIn = isSignedIn();
+    let ShowPageOptions = false;
+    if (signedIn) {
+      setPageState(State_ShowPageOptions);
+    } else {
+      setPageState(State_ShowSignIn);
+    }
+
+    async function setPageState(pageState) {
+      switch (pageState) {
+        case State_ShowSignIn:
+          document.getElementById('grpRegistrations').style.display = "none";
+          document.getElementById('grpLogin').style.display = "block";
+
+          break;
+
+        case State_ShowPageOptions:
+          document.getElementById('grpLogin').style.display = "none";
+          document.getElementById('grpRegistrations').style.display = "";
+
+          // get rehearsal dates
+          await fetchAndUpdateRehearsalDatesFilter();
+
+          break;
+
+        case State_ShowStudentRegistrations:
+
+          let orchestra = document.getElementById('Orchestra').value;
+          let trimester = document.getElementById('Trimester').value;
+          let instrument = document.getElementById('Instrument').value;
+          let studentType = document.getElementById('StudentType').value;
+          let attendanceState = document.getElementById('AttendanceState').value;
+          let rehearsalDate = document.getElementById('RehearsalDate').value;
+
+          // todo: add api to retrieve instruments used for all, for an orchestra, leverage in staff.html
+          // todo: add api for user handling
+          // todo: create api's for CRUD 
+          // todo: create a set of pages to edit entities easily
+          // todo: ensure this page can leverage the crud capabilities
+
+          //console.log(`Ochestra:${orchestra} , Trimester: ${trimester}`);
+          getStudentRegistrationForAllDates(orchestra, trimester, instrument, studentType, attendanceState, rehearsalDate).then(response => {
+            //console.log(`response: ${response}`);
+            response.json().then(allRows => {
+              //console.log(`allRows: ${allRows}`);
+              // returned data is an array with rows containing data rows per date with all the students sorted by student id
+              // data[Date Dimension][Rows of Student Objects], e.g. data[0][]
+              //console.log(`Row[0][0].ID...: ${allRows[0][0].ID}, ${allRows[0][0].Name}, ${allRows[0][0].registration_type}, ${allRows[0][0].rehearsal_date}`);
+              //console.log(`Row[allRows.length - 1][0].ID...: ${allRows[allRows.length - 1][0].ID}, ${allRows[allRows.length - 1][0].Name}, ${allRows[allRows.length - 1][0].registration_type}, ${allRows[allRows.length - 1][0].rehearsal_date}`);
+
+              let tableBody = document.getElementById('tableBody');
+              tableBody.style.display = "none";
+              tableBody.innerHTML = '';
+
+              let tableHeading = document.getElementById('tableHeading');
+              tableHeading.innerHTML = '';
+              let rowHeaderDiv = document.createElement("div");
+              rowHeaderDiv.classList.add("divTableRow");
+
+              let idHeaderElem = document.createElement("div");
+              idHeaderElem.classList.add("divTableHead");
+              idHeaderElem.ID = `HeaderID`;
+              idHeaderElem.innerHTML = "ID";
+              rowHeaderDiv.appendChild(idHeaderElem);
+
+              let nameHeaderElem = document.createElement("div");
+              nameHeaderElem.classList.add("divTableHeadName");
+              nameHeaderElem.ID = `HeaderName`;
+              nameHeaderElem.innerHTML = "Name";
+              rowHeaderDiv.appendChild(nameHeaderElem);
+
+              let instrumentHeaderElem = document.createElement("div");
+              instrumentHeaderElem.classList.add("divTableHead");
+              instrumentHeaderElem.ID = `HeaderInstrument`;
+              instrumentHeaderElem.innerHTML = "Instrument";
+              rowHeaderDiv.appendChild(instrumentHeaderElem);
+
+              let orchestraHeaderElem = document.createElement("div");
+              orchestraHeaderElem.classList.add("divTableHead");
+              orchestraHeaderElem.ID = `HeaderOrchestra`;
+              orchestraHeaderElem.innerHTML = "Orchestra";
+              rowHeaderDiv.appendChild(orchestraHeaderElem);
+
+              let isRAHeaderElem = document.createElement("div");
+              isRAHeaderElem.classList.add("divTableHead");
+              isRAHeaderElem.ID = `HeaderIsRA`;
+              isRAHeaderElem.innerHTML = "IsRA";
+              rowHeaderDiv.appendChild(isRAHeaderElem);
+
+              let absencesHeaderElem = document.createElement("div");
+              absencesHeaderElem.classList.add("divTableHead");
+              absencesHeaderElem.ID = `HeaderAbscences`;
+              absencesHeaderElem.innerHTML = "ABS";
+              rowHeaderDiv.appendChild(absencesHeaderElem);
+
+              tableHeading.appendChild(rowHeaderDiv);
+              //tableBody.appendChild(tableHeading);
+
+              let maxDateCount = allRows.length;
+              console.log(`allRows.length: ${allRows.length}`);
+
+              // done: get actual max student count for each column as the first one may not in some cases be having the max no of students.
+              //       e.g. this is true for scenarios showing e.g. tardiness or abs for a trimester.
+              // todo: store all student objects from different columns as this is needed when column length is different. 
+              //       this is to ensure the id, name and more columns gets correctly populated for these students.
+              //       but store them by id ensuring the correct column gets populated. 
+              let maxStudentCount = allRows.length > 0 ? allRows[0].length : 0;
+              console.log(`Max count: ${maxStudentCount}`);
+              for (let dateCounter = 0; dateCounter < maxDateCount; dateCounter++) {
+                maxStudentCount = Math.max(maxStudentCount, allRows[dateCounter].length);
+                console.log(`Max count: ${maxStudentCount}`);
+              }
+
+              for (let studentCounter = 0; studentCounter < maxStudentCount; studentCounter++) {
+                let rowDiv = null;
+                let absencesAndTardies = 0;
+                let absenceElem = null;
+                let idElem = null;
+                let studentObj = undefined;
+                for (let dateCounter = 0; dateCounter < maxDateCount; dateCounter++) {
+                  studentObj = allRows[dateCounter][studentCounter];
+
+                  // if (dateCounter == 0 && studentCounter == 0) {
+                  //   // todo: top left ?
+                  // }
+                  if (studentObj === undefined) {
+                    studentObj = { // a student object may not be found in some searches such as when looking for specific attandance
+                      ID: 112,
+                      Instrument: "i_WHAT",
+                      IsRA: 0,
+                      Name: "n_WHAT",
+                      Orchestra: "O_WHAT",
+                      registration_type: "---", //mark as --- as the value is unknown based on the filter criteria rt_WHAT
+                      rehearsal_date: "rd_0000-00-00"
+                    };
+                    // console.log(`StudentObj: ${studentObj}`);
+                  }
+
+                  if (dateCounter == 0) {
+                    //console.log(`Row[${dateCounter}][${studentCounter}].ID...: ${studentObj.ID}, ${studentObj.Name}, ${studentObj.registration_type}, ${studentObj.rehearsal_date}`);
+                    //console.log(`Row[${dateCounter}][${studentCounter}].ID and Row[${dateCounter}][${studentCounter}].Name = ${studentObj.ID}, ${studentObj.Name}`);
+                    //todo: add a row header with the id, name of the student
+                    rowDiv = document.createElement("div");
+                    rowDiv.classList.add("divTableRow");
+                    rowDiv.id = `student_${studentObj.ID}`;
+
+                    idElem = document.createElement("div");
+                    idElem.classList.add("divTableCell");
+                    // idElem.innerHTML = studentObj.ID; // moved below to add a link
+                    // adding a link to the id column. 
+                    // FORMAT: https://qrcode.syso.org/?id=2023100720&name=Noah%20Becker&instr=Bass
+
+                    let idlink = `https://qrcode.syso.org/?id=${studentObj.ID}&name=${studentObj.Name}&instr=${studentObj.Instrument}`;
+                    idElem.innerHTML = `<A HREF='${idlink}'>${studentObj.ID}</A>`;
+                    rowDiv.appendChild(idElem);
+
+                    let nameElem = document.createElement("div");
+                    nameElem.classList.add("divTableCellName");
+                    nameElem.innerHTML = studentObj.Name;
+                    rowDiv.appendChild(nameElem);
+
+                    let instrumentElem = document.createElement("div");
+                    instrumentElem.classList.add("divTableCellName");
+                    instrumentElem.innerHTML = studentObj.Instrument;
+                    rowDiv.appendChild(instrumentElem);
+
+                    let orchestraElem = document.createElement("div");
+                    orchestraElem.classList.add("divTableCell");
+                    orchestraElem.innerHTML = studentObj.Orchestra;
+                    rowDiv.appendChild(orchestraElem);
+
+                    let isRAElem = document.createElement("div");
+                    isRAElem.classList.add("divTableCell");
+                    isRAElem.innerHTML = studentObj.IsRA;
+                    rowDiv.appendChild(isRAElem);
+
+                    absenceElem = document.createElement("div");
+                    //absenceElem.classList.add("divTableCell");
+                    absenceElem.innerHTML = "0";
+                    absenceElem.id = `absstudent_${studentObj.ID}`;
+                    rowDiv.appendChild(absenceElem);
+
+                  }
+
+                  if (studentCounter == 0) {
+                    // console.log(`Row[${dateCounter}][${studentCounter}].ID...: ${studentObj.ID}, ${studentObj.Name}, ${studentObj.registration_type}, ${studentObj.rehearsal_date}`);
+                    //console.log(`Row[${dateCounter}][${studentCounter}].rehearsal_date = ${studentObj.rehearsal_date}`);
+
+                    // todo: add a column header with the date
+                    let reharsalDateElem = document.createElement("div");
+                    reharsalDateElem.classList.add("divTableHead");
+                    let formattedReharsalDate = studentObj.rehearsal_date;
+                    reharsalDateElem.innerHTML = formattedReharsalDate;
+                    rowHeaderDiv.appendChild(reharsalDateElem);
+                  }
+
+                  // Aggregate column showing all the absences (may add that column after each trimester as that will follow in natural order for counting)
+                  // And Registration type coloring depending on presence
+                  // todo: find sub classes and re-class the row or add a color to the aggregate row for values
+                  let attendanceElem = document.createElement("div");
+                  if (studentObj.registration_type == "ABS") {
+                    attendanceElem.classList.add("divTableCellAbs");
+                    absencesAndTardies++;
+                  }
+                  else if (studentObj.registration_type == ".5 ABS") {
+                    attendanceElem.classList.add("divTableCellHalfAbs");
+                    absencesAndTardies += 0.5;
+                  }
+                  else if (studentObj.registration_type == "ABS-NR") {
+                    attendanceElem.classList.add("divTableCellTardy");
+                    absencesAndTardies++;
+                  }
+                  else if (studentObj.registration_type == "OUT") {
+                    attendanceElem.classList.add("divTableCellOut");
+                  }
+                  else {
+                    attendanceElem.classList.add("divTableCell");
+                  }
+                  let attendanceText = studentObj.registration_type;
+                  attendanceElem.innerHTML = `<nobr>${attendanceText}</nobr>`;
+                  rowDiv.appendChild(attendanceElem);
+
+
+
+                }
+
+                if (absenceElem != null) {
+                  absenceElem.innerHTML = absencesAndTardies;
+                  if (absencesAndTardies <= 2) {
+                    absenceElem.classList.add("divTableCellAbsOk");
+                    //console.log('Ok');
+                  } else if (absencesAndTardies > 2 && absencesAndTardies <= 3) {
+                    absenceElem.classList.add("divTableCellHalfAbs");
+                    //console.log('HalfAbs');
+                  } else if (absencesAndTardies > 3) {
+                    absenceElem.classList.add("divTableCellTooManyAbs");
+                    //console.log('Abs');
+                  }
+                }
+
+                tableBody.appendChild(rowDiv);
+                //console.log('appending row to body');
+              }
+
+              tableBody.style.display = "";
+              //console.log('make body visible');
+            });
+          });
+
+          // Todo: Consider if Add should be visible or not
+          // document.getElementById('grpLogin').style.display = "none";
+          // document.getElementById('grpRegistrations').style.display = "block";
+
+          break;
+
+        default:
+          alert('Unknown page state :(');
+      }
+
+      currentPageState = pageState;
+    }
+
+    function setupEventlisteners() {
+      if (eventlistenersInitialized) {
+        return;
+      }
+      // document.getElementById('signin').removeEventListener('click', signinButton_click());
+      document.getElementById('signin').addEventListener('click', signinButton_click);
+      document.getElementById('btnShowData').addEventListener('click', btnShowData_click);
+    }
+
+    async function isSignedIn() {
+      console.log('signing in...');
+      let resultStatus = 0;
+      // TODO: Update to use a staff key instead of student key
+      console.log('UPDATE NEEDED: Move to staff key from student key.')
+      await fetch(`/iskeyvalid?`, { headers: { 'passkey': localStorage.getItem("passkey") } })
+        .then(res => {
+          // todo if status is good call init, if status is not good stay on this state and show a message that they key was wrong.
+          console.log(`Sign-in status: ${res.status}`);
+          // console.log(res);
+          resultStatus = res.status;
+        });
+
+      return resultStatus == 200;
+    }
+
+    function btnShowData_click() {
+      setPageState(State_ShowStudentRegistrations);
+    }
+
+    function signinButton_click() {
+      let studentkey = document.getElementById('studentkey').value;
+      localStorage.setItem("studentkey", studentkey);
+
+      let signedIn = isSignedIn();
+      if (signedIn) {
+        setPageState(State_ShowPageOptions);
+      }
+      else {
+        alert('Staff (TODO: Move away from studentkey) password is not correct!');
+      }
+    }
+
+    async function getStudentRegistrationForAllDates(orchestra, trimester, instrument, studentType, attendanceState, rehearsalDate) {
+      //console.log(`getStudentRegistrationForDate: Date: ${date}. Orchestra: ${orchestra}`);
+      return await fetch(`/GetStudentRegistrationsForAllDates?Orchestra=${orchestra}&Trimester=${trimester}&Instrument=${instrument}&StudentType=${studentType}&AttendanceState=${attendanceState}&RehearsalDate=${rehearsalDate}`, { headers: { 'passkey': localStorage.getItem("passkey") } });
+    }
+
+    async function fetchAndUpdateRehearsalDatesFilter() {
+      await fetch("/getRehearsalDates", { headers: { 'passkey': localStorage.getItem("passkey") } })
+        .then((res) => {
+          res.json().then((dates) => { updateDates(dates); });
+        });
+    }
+
+    function updateDates(dates) {
+      rehearsalDates = dates;
+      [...document.getElementsByClassName('date')].forEach(elem => {
+        while (elem.firstChild) {
+          elem.removeChild(elem.firstChild);
+        }
+        let searchDate = new Date(Date.now());
+        let minDiff = Infinity;
+        rehearsalDates.forEach(date => {
+          let diff = Math.abs((new Date(date.rehearsal_date + " ")) - searchDate);
+          minDiff = (minDiff > diff) ? diff : minDiff;
+        });
+
+        let allOption = document.createElement('option');
+        allOption.textContent = "ALL";
+        //allOption.selected = true;
+        elem.appendChild(allOption);
+
+        rehearsalDates.forEach(date => {
+          let option = document.createElement('option');
+          option.textContent = date.rehearsal_date; // + "—" + (date.rehearsal_type ? date.rehearsal_type : "rehearsal") + "—trimester " + date.trimester;
+          //if (Math.abs((new Date(date.rehearsal_date + " ")) - searchDate) == minDiff) {
+          // option.selected = true;
+          //}
+          elem.appendChild(option);
+        });
+      });
+    }
+  </script>
+</body>
+
+</html>

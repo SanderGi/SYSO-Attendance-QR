@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>SYSO | Students</title>
+    <meta name="description" content="A program to automate SYSO attendance" />
+    <link
+      id="favicon"
+      rel="icon"
+      href="https://syso.org/wp-content/uploads/2016/06/syso_logo_web_markM_BLUE.png"
+      type="image/png"
+    />
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <script src="html5-qrcode.min.js"></script>
+    <!-- import the webpage's stylesheet -->
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+
+  <body>
+    <br />
+    <div id="container" style="position: relative">
+      <h1>
+        <img
+          src="https://syso.org/wp-content/uploads/2016/06/syso_logo_web_markM_BLUE.png"
+        />
+      </h1>
+      <div class="back">
+        <h2>Student Registrations</h2>
+        <div id="grpLogin" style="display: none">
+          <div class="form__group field">
+            <input
+              type="text"
+              class="form__field"
+              placeholder="Student ID"
+              name="studentkey"
+              id="studentkey"
+              required
+            />
+            <label for="studentkey" class="form__label">Student Password</label>
+          </div>
+          <div class="btn-wrapper">
+            <button id="signin" class="btn">Sign In</button>
+          </div>
+        </div>
+        <div id="grpScan" class="btn-wrapper" style="display: none">
+          <p>
+            <br />Please ensure you use the QR Code from the email and then
+            click Scan.
+          </p>
+          <button id="btnScan" class="btn">Scan</button>
+        </div>
+        <div id="reader" style="display: none"></div>
+        <div id="grpAdd" style="display: none">
+          <div class="form__group field">
+            <input
+              type="text"
+              class="form__field"
+              placeholder="Student ID"
+              name="studid"
+              id="studid"
+              required
+            />
+            <label for="studid" class="form__label">Student ID</label>
+          </div>
+          <div class="form__group field">
+            <input
+              type="text"
+              class="form__field"
+              placeholder="Name"
+              name="regnam"
+              id="regnam"
+              required
+            />
+            <label for="regnam" class="form__label">Name</label>
+          </div>
+          <div id="grpRegistrations" style="display: none">
+            <div>
+              <h2>Registrations</h2>
+            </div>
+            <div class="divTable sysoAttendance">
+              <div class="divTableHeading">
+                <div class="divTableRow">
+                  <div class="divTableHead">Rehearsal Date</div>
+                  <div class="divTableHead">Status</div>
+                </div>
+              </div>
+              <div class="divTableBody" id="tableBody"></div>
+            </div>
+            <div>
+              <p class="legend">
+                <b>P</b>resent, <b>Abs</b>ent, <b>.5 Abs</b>ent,
+                <b>Sick</b> (absent), <b>Out</b> this trimester
+              </p>
+            </div>
+          </div>
+          <br />
+          <select class="date" id="regdate">
+            <option>Options loading...</option>
+          </select>
+          <br /><br />
+          <select id="status">
+            <option selected>ABS</option>
+            <option>.5 ABS</option>
+            <option>SICK</option>
+          </select>
+          <div class="btn-wrapper">
+            <button id="registrations-add" class="btn">ADD</button>
+          </div>
+          <div class="btn-wrapper" style="display: none">
+            <button id="registrations-update" class="btn">Refresh</button>
+          </div>
+        </div>
+      </div>
+      <br />
+    </div>
+    <iframe
+      style="height: 0; border: none; margin: 0; padding: 0"
+      id="frame"
+    ></iframe>
+    <script>
+      let rehearsalDates = [];
+      let config = {
+        fps: 10,
+        qrbox: { width: 250, height: 250 },
+        rememberLastUsedCamera: true,
+        // Only support camera scan type.
+        supportedScanTypes: [
+          Html5QrcodeScanType.SCAN_TYPE_FILE,
+          Html5QrcodeScanType.SCAN_TYPE_CAMERA,
+        ],
+      };
+      let html5QrcodeScanner = new Html5QrcodeScanner("reader", config, false);
+
+      let eventlistenersInitialized = false;
+      setupEventlisteners();
+      eventlistenersInitialized = true;
+
+      let signedIn = isSignedIn();
+      if (signedIn) {
+        setPageState("PreScan");
+      } else {
+        setPageState("sign-in");
+      }
+
+      function setPageState(pageState) {
+        switch (pageState) {
+          case "sign-in":
+            document.getElementById("grpAdd").style.display = "none";
+            document.getElementById("grpScan").style.display = "none";
+            document.getElementById("reader").style.display = "none";
+            document.getElementById("grpRegistrations").style.display = "none";
+            document.getElementById("grpLogin").style.display = "block";
+
+            break;
+
+          case "PreScan":
+            document.getElementById("grpLogin").style.display = "none";
+            document.getElementById("grpAdd").style.display = "none";
+            document.getElementById("grpScan").style.display = "block";
+            document.getElementById("reader").style.display = "none";
+            document.getElementById("grpRegistrations").style.display = "none";
+            document.getElementById("grpLogin").style.display = "none";
+
+            getRehearsalDates();
+
+            // scan button click
+            break;
+
+          case "Scanning":
+            document.getElementById("grpLogin").style.display = "none";
+            document.getElementById("grpScan").style.display = "none";
+            document.getElementById("grpAdd").style.display = "none";
+            document.getElementById("grpRegistrations").style.display = "none";
+            document.getElementById("reader").style.display = "block";
+            document.getElementById("grpLogin").style.display = "none";
+            html5QrcodeScanner.render(onScanSuccess);
+            break;
+
+          case "ShowingScanInfo":
+          case "UpdateStudentRegistrations":
+            getStudentRegistrations().then((response) => {
+              //console.log(`Response: ${response}`);
+              response.json().then((registrationRows) => {
+                // console.log(`Response: ${registrationRows}`);
+
+                // Loop rows and show data meaningfully
+                // Rows
+
+                let parsedRows = JSON.parse(registrationRows);
+
+                // console.log("Number of rows: " + parsedRows.length)
+
+                let tableBody = document.getElementById("tableBody");
+                //tableBody.removeChildren();
+                tableBody.innerHTML = "";
+
+                let trimester = 0;
+                let absences = 0;
+                let rowCounter = 0;
+                let totalRowCount = parsedRows.length;
+                let trimesterElem2 = null;
+                parsedRows.forEach((registrationRow) => {
+                  let currentTrimester = registrationRow["trimester"];
+                  if (currentTrimester != trimester) {
+                    // Absences that needs updating?
+                    if (trimester != 0) {
+                      trimesterElem2.innerHTML = `<H2>ABS: ${absences}</H2>`;
+                    }
+
+                    // Row
+                    let trimesagerRowDiv = document.createElement("div");
+                    trimesagerRowDiv.classList.add("divTableRow");
+
+                    let trimesterElem = document.createElement("div");
+                    trimesterElem.classList.add("divTableHead");
+                    trimesterElem.innerHTML = `<H2>Trimester: ${registrationRow["trimester"]}</H2>`;
+                    trimesagerRowDiv.appendChild(trimesterElem);
+                    trimesterElem2 = document.createElement("div");
+                    trimesterElem2.classList.add("divTableHead");
+                    trimesagerRowDiv.appendChild(trimesterElem2);
+                    tableBody.appendChild(trimesagerRowDiv);
+
+                    trimester = currentTrimester;
+                    absences = 0;
+                  }
+
+                  // Row
+                  let rowDiv = document.createElement("div");
+                  rowDiv.classList.add("divTableRow");
+
+                  let rehearsalElem = document.createElement("div");
+                  rehearsalElem.classList.add("divTableCell");
+                  rowDiv.appendChild(rehearsalElem);
+                  rehearsalElem.innerHTML = registrationRow["rehearsal_date"];
+
+                  let registrationTypeElem = document.createElement("div");
+                  registrationTypeElem.classList.add("divTableCell");
+                  rowDiv.appendChild(registrationTypeElem);
+                  let registrationType = registrationRow["registration_type"];
+                  registrationTypeElem.innerHTML = registrationType;
+
+                  if (registrationType == "ABS" || registrationType == "SICK") {
+                    absences++;
+                  } else if (
+                    registrationType == ".5 ABS" ||
+                    registrationType == "0.5 ABS"
+                  ) {
+                    absences += 0.5;
+                  }
+
+                  tableBody.appendChild(rowDiv);
+
+                  // need to include the last absence count
+                  if (rowCounter == totalRowCount - 1) {
+                    trimesterElem2.innerHTML = `<H2>ABS: ${absences}</H2>`;
+                  }
+                  rowCounter++;
+                });
+              });
+            });
+
+            // Todo: Consider if Add should be visible or not
+            document.getElementById("grpLogin").style.display = "none";
+            document.getElementById("grpScan").style.display = "none";
+            document.getElementById("grpAdd").style.display = "block";
+            document.getElementById("grpRegistrations").style.display = "block";
+            document.getElementById("reader").style.display = "none";
+            document.getElementById("grpLogin").style.display = "none";
+
+            break;
+
+          default:
+            alert("Unknown page state :(");
+        }
+
+        currentPageState = pageState;
+      }
+
+      function setupEventlisteners() {
+        if (eventlistenersInitialized) {
+          return;
+        }
+        // document.getElementById('signin').removeEventListener('click', signinButton_click());
+        document
+          .getElementById("signin")
+          .addEventListener("click", signinButton_click);
+
+        // document.getElementById('btnScan').removeEventListener('click', scanButton_click());
+        document
+          .getElementById("btnScan")
+          .addEventListener("click", scanButton_click);
+
+        // document.getElementById('registrations-add').removeEventListener('click', addRegistrationButton_click);
+        document
+          .getElementById("registrations-add")
+          .addEventListener("click", addRegistrationButton_click);
+
+        document
+          .getElementById("registrations-update")
+          .addEventListener("click", updateRegistrationButton_click);
+      }
+
+      async function isSignedIn() {
+        console.log("signing in...");
+        let resultStatus = 0;
+        await fetch(`/isstudentkeyvalid?`, {
+          headers: { studentkey: localStorage.getItem("studentkey") },
+        }).then((res) => {
+          // todo if status is good call init, if status is not good stay on this state and show a message that they key was wrong.
+          console.log(res.status);
+          //console.log(res);
+          resultStatus = res.status;
+        });
+
+        return resultStatus == 200;
+      }
+
+      function signinButton_click() {
+        let studentkey = document.getElementById("studentkey").value;
+        localStorage.setItem("studentkey", studentkey);
+
+        let signedIn = isSignedIn();
+        if (signedIn) {
+          setPageState("PreScan");
+        } else {
+          alert("Student password is not correct!");
+        }
+      }
+
+      function getRehearsalDates() {
+        if (rehearsalDates.length > 0) {
+          return;
+        }
+
+        fetch("/getRehearsalDates", {
+          headers: { studentkey: localStorage.getItem("studentkey") },
+        }).then((res) => {
+          if (res.status == 200) {
+            res.json().then((dates) => {
+              updateDates(dates);
+            });
+          } else {
+            setPageState("sign-in");
+            return;
+          }
+        });
+      }
+
+      function scanButton_click() {
+        setPageState("Scanning");
+      }
+
+      function addRegistrationButton_click() {
+        addStudentRegistration().then((response) => {
+          //console.log(`Response: ${response}`);
+          if (response.status != 200) {
+            alert(
+              "Registrations has to be done at least 24 hours prior to rehearsal. Please send an email for reporting absences  later than 24 hours ahead of the rehearsal."
+            );
+            return;
+          }
+          setPageState("UpdateStudentRegistrations");
+          //response.json().then( jsonresponse => {
+          //  console.log(`Json Response: ${jsonresponse}`);
+        });
+      }
+
+      function updateRegistrationButton_click() {
+        setPageState("UpdateStudentRegistrations");
+      }
+
+      async function addStudentRegistration() {
+        let id = document.getElementById("studid").value;
+        let name = document.getElementById("regnam").value;
+        let date =
+          rehearsalDates[document.getElementById("regdate").selectedIndex]
+            .rehearsal_date;
+        let status =
+          document.getElementById("status").options[
+            document.getElementById("status").selectedIndex
+          ].value;
+
+        //console.log(`id=${id}&name=${name}&date=${date}&status=${status}`);
+        // Get email as well here and add as header... see get registrations for todo. refactor to leverage both places.
+
+        // TODO: Check for validity!
+        return await fetch(
+          `/addStudentRegistration?&id=${id}&name=${name}&date=${date}&status=${status}`,
+          {
+            headers: {
+              studentkey: localStorage.getItem("studentkey"),
+            },
+          }
+        );
+      }
+
+      async function getStudentRegistrations() {
+        let id = document.getElementById("studid").value;
+        let name = document.getElementById("regnam").value;
+
+        //TODO: validate that we have something for id and name (do not have to send name...)
+
+        // TODO: incorporate the email address or another personal code (could use a personal code and replace the studentkey?)
+        // let emailAddress = prompt("Please enter your email address", "Pls. use the value in the to field from the email with the QR Code");
+
+        return await fetch(`/GetStudentRegistrations?id=${id}&name=${name}`, {
+          headers: {
+            studentkey: localStorage.getItem("studentkey"),
+            // 'email':emailAddress,
+          },
+        });
+      }
+
+      // get rehearsal dates
+      function updateDates(dates) {
+        rehearsalDates = dates;
+        [...document.getElementsByClassName("date")].forEach((elem) => {
+          while (elem.firstChild) {
+            elem.removeChild(elem.firstChild);
+          }
+          let searchDate = new Date(Date.now());
+          let minDiff = Infinity;
+          rehearsalDates.forEach((date) => {
+            let diff = Math.abs(
+              new Date(date.rehearsal_date + " ") - searchDate
+            );
+            minDiff = minDiff > diff ? diff : minDiff;
+          });
+          rehearsalDates.forEach((date) => {
+            let option = document.createElement("option");
+            option.textContent = `Trimester: ${date.trimester}, ${date.rehearsal_date}`;
+            new Date(date.rehearsal_date).toDateString() +
+              "(" +
+              (date.rehearsal_type ? date.rehearsal_type + "-" : "") +
+              "Tri " +
+              date.trimester +
+              ")";
+            if (
+              Math.abs(new Date(date.rehearsal_date + " ") - searchDate) ==
+              minDiff
+            ) {
+              option.selected = true;
+            }
+            elem.appendChild(option);
+          });
+        });
+      }
+
+      function onScanSuccess(decodedText, decodedResult) {
+        // Handle on success condition with the decoded text or result.
+        //html5QrcodeScanner.pause();
+        console.log(`Scan result: ${decodedText}`, decodedResult);
+        let url = new URL(decodedText);
+        if (
+          url.hostname == "syso-attendance.glitch.me" ||
+          url.hostname == "syso-attendance"
+        ) {
+          // only accept QR codes with a specific URL
+          let params = url.searchParams;
+          let name = params.get("name") || "no name";
+          let id = params.get("id") || 404;
+          console.log(`ID: ${id}, Name:${name}`);
+          if (id == 404 || name == "no name") {
+            alert("Please use the QR Code you received via email!");
+            //html5QrcodeScanner.resume();
+            return;
+          }
+
+          document.getElementById("studid").value = id;
+          document.getElementById("regnam").value = name;
+
+          setPageState("ShowingScanInfo");
+
+          // update id and name field with information from the QR Code
+
+          //          submitGoogleForm(name, id).then(res => {
+          //            console.log(`Response: ${res}`);
+          //            res.json().then(data => {
+          //              let nameToShow = name;
+          //              console.log(`Name2show: ${nameToShow}, data:${data}`);
+          //              if (data.length > 0) {
+          //                nameToShow = data[0].Name
+          //              }
+          //              handleSubmit(nameToShow);
+          //            },
+          //              err => {
+          //                console.log(`Error: ${err}`);
+          //            });
+          //          });
+        }
+      }
+    </script>
+  </body>
+</html>

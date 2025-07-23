@@ -1,0 +1,281 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: helvetica, arial, sans-serif;
+  background: url(https://syso.org/wp-content/uploads/2016/12/SCM_Squareweb.jpg)
+    no-repeat center center fixed;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+}
+
+h1 {
+  transform: translateY(-36%);
+  width: 100%;
+  text-align: center;
+}
+
+h2 {
+  color: white;
+  width: 100%;
+  text-align: center;
+}
+
+h3 {
+  margin-left: 10px;
+  color: white;
+}
+
+img {
+  transform: translateY(36%);
+}
+
+.btn-wrapper {
+  text-align: center;
+}
+
+.btn {
+  background-color: #008ee2;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  margin-top: 16px;
+  padding: 16px;
+  font-size: 3em;
+  min-width: 80%;
+}
+
+#reader {
+  width: 100%;
+}
+
+#container {
+  padding: 20px;
+  background-color: white;
+  width: min(90%, 500px);
+  height: fit-content;
+  position: absolute;
+  margin: auto;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  border-radius: 10px;
+}
+
+.back {
+  background-color: #54b2e9;
+  border-radius: 10px;
+  overflow: hidden;
+  padding-top: 12px;
+  padding-bottom: 12px;
+}
+
+.form__group {
+  position: relative;
+  margin-top: 2px;
+  width: 100%;
+  padding: 16px;
+}
+
+.form__group input:-webkit-autofill,
+.form__group input:-webkit-autofill:hover,
+.form__group input:-webkit-autofill:focus,
+.form__group input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px #54b2e9 inset !important;
+  -webkit-text-fill-color: white;
+}
+.form__label {
+  position: absolute;
+  top: 0;
+  display: block;
+  transition: 0.2s;
+  font-size: 1rem;
+  color: white;
+}
+.form__field {
+  font-family: inherit;
+  width: 100%;
+  border: 0;
+  border-bottom: 2px solid white;
+  outline: 0;
+  font-size: 1.3rem;
+  color: gainsboro;
+  padding: 7px 0;
+  background: transparent;
+  transition: border-color 0.2s;
+}
+.form__field::placeholder {
+  color: transparent;
+}
+.form__field:placeholder-shown ~ .form__label {
+  font-size: 1.3rem;
+  cursor: text;
+  top: 20px;
+}
+.form__field:required,
+.form__field:invalid {
+  box-shadow: none;
+}
+.form__field:focus {
+  padding-bottom: 6px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  border-width: 3px;
+  border-image: linear-gradient(to left, white, white);
+  border-image-slice: 1;
+}
+.form__field:focus ~ .form__label {
+  position: absolute;
+  top: 0;
+  display: block;
+  transition: 0.2s;
+  font-size: 1rem;
+  color: white;
+  font-weight: 700;
+}
+
+select {
+  /* reset */
+  margin: 0;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+
+  /* styling */
+  background-color: white;
+  border: thin solid blue;
+  border-radius: 4px;
+  font: inherit;
+  line-height: 1.5em;
+  padding: 0.5em 3.5em 0.5em 1em;
+  width: calc(100% - 20px);
+  margin-left: 10px;
+
+  background-image: linear-gradient(45deg, transparent 50%, gray 50%),
+    linear-gradient(135deg, gray 50%, transparent 50%),
+    linear-gradient(to right, #cccccc, #cccccc);
+  background-position: calc(100% - 20px) calc(1em + 2px),
+    calc(100% - 15px) calc(1em + 2px), calc(100% - 2.5em) 0.5em;
+  background-size: 5px 5px, 5px 5px, 1px 1.5em;
+  background-repeat: no-repeat;
+}
+
+select:focus {
+  background-image: linear-gradient(45deg, green 50%, transparent 50%),
+    linear-gradient(135deg, transparent 50%, green 50%),
+    linear-gradient(to right, #cccccc, #cccccc);
+  background-position: calc(100% - 15px) 1em, calc(100% - 20px) 1em,
+    calc(100% - 2.5em) 0.5em;
+  background-size: 5px 5px, 5px 5px, 1px 1.5em;
+  background-repeat: no-repeat;
+  border-color: green;
+  outline: 0;
+}
+
+select:-moz-focusring {
+  color: transparent;
+  text-shadow: 0 0 0 #000000;
+}
+
+.legend {
+  font-size: small;
+  font-style: italic;
+  padding-left: 3px;
+}
+
+div.sysoAttendance {
+  /* border: 4px solid #008EE2; */
+  background-color: #53b1e9;
+  width: 100%;
+  text-align: center;
+  border-collapse: collapse;
+}
+.divTable.sysoAttendance .divTableCell,
+.divTable.sysoAttendance .divTableHead {
+  border: 1px solid #ffffff;
+  padding: 5px 10px;
+}
+.divTable.sysoAttendance .divTableBody .divTableCell {
+  font-size: 12px;
+  font-weight: bold;
+  color: #ffffff;
+}
+.divTable.sysoAttendance .divTableRow:nth-child(even) {
+  background: #53b1e9;
+}
+.divTable.sysoAttendance .divTableCell:nth-child(even) {
+  background: #53b1e9;
+}
+.divTable.sysoAttendance .divTableHeading {
+  background: #008ee2;
+  background: -moz-linear-gradient(top, #40aae9 0%, #1999e5 66%, #008ee2 100%);
+  background: -webkit-linear-gradient(
+    top,
+    #40aae9 0%,
+    #1999e5 66%,
+    #008ee2 100%
+  );
+  background: linear-gradient(to bottom, #40aae9 0%, #1999e5 66%, #008ee2 100%);
+}
+.divTable.sysoAttendance .divTableHeading .divTableHead {
+  font-size: 15px;
+  font-weight: bold;
+  color: #ffffff;
+  text-align: center;
+  border-left: 2px solid #ffffff;
+}
+.divTable.sysoAttendance .divTableHeading .divTableHead:first-child {
+  border-left: none;
+}
+
+.sysoAttendance .tableFootStyle {
+  font-size: 13px;
+}
+.sysoAttendance .tableFootStyle .links {
+  text-align: right;
+}
+.sysoAttendance .tableFootStyle .links a {
+  display: inline-block;
+  background: #ffffff;
+  color: #398aa4;
+  padding: 2px 8px;
+  border-radius: 5px;
+}
+.sysoAttendance.outerTableFooter {
+  border-top: none;
+}
+.sysoAttendance.outerTableFooter .tableFootStyle {
+  padding: 3px 5px;
+}
+/* DivTable.com */
+.divTable {
+  display: table;
+}
+.divTableRow {
+  display: table-row;
+}
+.divTableHeading {
+  display: table-header-group;
+}
+.divTableCell,
+.divTableHead {
+  display: table-cell;
+}
+.divTableHeading {
+  display: table-header-group;
+}
+.divTableFoot {
+  display: table-footer-group;
+}
+.divTableBody {
+  display: table-row-group;
+}

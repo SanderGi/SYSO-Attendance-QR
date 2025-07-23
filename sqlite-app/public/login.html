@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>SYSO | Login</title>
+    <meta name="description" content="A program to automate SYSO attendance" />
+    <link
+      id="favicon"
+      rel="icon"
+      href="https://syso.org/wp-content/uploads/2016/06/syso_logo_web_markM_BLUE.png"
+      type="image/png"
+    />
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- import the webpage's stylesheet -->
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <br />
+    <div id="container" style="position: relative">
+      <h1>
+        <img
+          src="https://syso.org/wp-content/uploads/2016/06/syso_logo_web_markM_BLUE.png"
+        />
+        Scanner Actions
+      </h1>
+      <div class="back">
+        <div class="form__group field">
+          <input
+            type="password"
+            class="form__field"
+            placeholder="Passkey"
+            name="passkey"
+            id="passkey"
+            required
+          />
+          <label for="passkey" class="form__label">Passkey</label>
+        </div>
+        <div class="btn-wrapper">
+          <button id="login" class="btn">LOGIN</button>
+        </div>
+      </div>
+      <br />
+    </div>
+    <iframe
+      style="height: 0; border: none; margin: 0; padding: 0"
+      id="frame"
+    ></iframe>
+    <script>
+      // login button
+      function login() {
+        console.log("signing in");
+        let passkey = document.getElementById("passkey").value;
+        // let id = document.getElementById('id').value;
+        // console.log(`ID: ${id}`);
+        localStorage.setItem("passkey", passkey);
+        fetch(`/iskeyvalid?`, {
+          headers: { passkey: localStorage.getItem("passkey") },
+        }).then((res) => {
+          console.log("Sign-in:" + res.status);
+          if (res.status != 200) {
+            alert("Sign-in failed: " + res.status);
+          } else {
+            alert("Signed-in successfully.");
+          }
+        });
+      }
+      document.getElementById("login").addEventListener("click", login);
+    </script>
+  </body>
+</html>
